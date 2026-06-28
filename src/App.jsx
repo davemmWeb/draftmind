@@ -71,9 +71,16 @@ function App() {
 {block.type === BLOCK_TYPES.PARAGRAPH && (
   <textarea
     value={block.content}
-    onChange={(e) => updateBlockContent(block.id, e.target.value)}
+    onChange={(e) => {
+      // 1. Actualiza el estado como lo hacía antes
+      updateBlockContent(block.id, e.target.value);
+      
+      // 2. Ajusta la altura dinámicamente al escribir
+      e.target.style.height = "auto"; // Resetea la altura
+      e.target.style.height = `${e.target.scrollHeight}px`; // Asigna la altura del contenido real
+    }}
     rows={1}
-    className="w-full text-base border-none outline-none focus:ring-0 py-1 bg-transparent text-zinc-300 resize-none leading-relaxed h-auto min-h-[1.5rem] placeholder-zinc-600"
+    className="w-full text-base border-none outline-none focus:ring-0 py-1 bg-transparent text-zinc-300 resize-none leading-relaxed overflow-hidden h-auto min-h-[1.5rem] placeholder-zinc-600"
     placeholder="Presiona para escribir..."
   />
 )}
