@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ExcelTable from "./components/ExcelTable";
+import ExcelTable from "./components/Table";
 
 const LOCAL_STORAGE_KEY = "draftmind_themes_v5";
 
@@ -204,7 +204,7 @@ function App() {
                 📝 Tema de Notas
               </button>
               <button onClick={() => handleAddTheme("table")} className="text-left text-xs text-zinc-300 hover:bg-emerald-950 hover:text-emerald-300 px-3 py-2 rounded-lg transition flex items-center gap-2">
-                📊 Tema de Excel
+                📊 Hoja de calculo
               </button>
             </div>
           )}
