@@ -5,3 +5,17 @@ body {
   color: #ffffff;
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
+
+/* Corrección definitiva para las listas de TipTap */
+.ProseMirror h1 { @apply text-3xl font-bold mb-4 text-zinc-100; }
+.ProseMirror h2 { @apply text-2xl font-bold mb-3 text-zinc-200; }
+.ProseMirror p { @apply mb-2; }
+
+/* Forzamos a que las listas tengan sangría y no salten de línea */
+.ProseMirror ul { @apply list-disc pl-6 mb-4 space-y-1; }
+.ProseMirror ol { @apply list-decimal pl-6 mb-4 space-y-1; }
+
+/* El truco mágico: obligar al párrafo interno a quedarse alineado con la viñeta */
+.ProseMirror li p { 
+  display: inline; 
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import ExcelTable from "./components/Table";
+import Table from "./components/Table";
+import RichTextEditor from "./components/RichTextEditor";
 
 const LOCAL_STORAGE_KEY = "draftmind_themes_v5";
 
@@ -214,34 +215,30 @@ function App() {
       {/* CONTENEDOR PRINCIPAL */}
       <main className="flex-1 flex flex-col justify-between bg-[#141414] relative overflow-hidden">
         
-        {/* ÁREA DE CONTENIDO */}
-        <div className="flex-1 overflow-y-auto py-16 px-12 md:px-20 max-w-5xl w-full mx-auto">
-          {currentSubTab ? (
-            currentTheme.type === "table" ? (
-              <div className="animate-fadeIn">
-                <h2 className="text-lg font-bold mb-4 text-emerald-400">📊 Hoja de Cálculo Interactiva</h2>
-                <ExcelTable 
-                  content={currentSubTab.content} 
-                  onChange={(newData) => updateContent(currentSubTab.id, newData)} 
-                />
-              </div>
-            ) : (
-              <textarea
-                value={currentSubTab.content}
-                onChange={(e) => {
-                  updateContent(currentSubTab.id, e.target.value);
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                className="w-full text-base border-none outline-none focus:ring-0 bg-transparent text-zinc-300 resize-none leading-relaxed h-auto min-h-[40vh] placeholder-zinc-700 font-sans"
-                placeholder="Empieza a escribir notas libres..."
-                autoFocus
-              />
-            )
-          ) : (
-            <p className="text-zinc-600">No hay ninguna pestaña activa.</p>
-          )}
-        </div>
+       {/* ÁREA DE CONTENIDO */}
+<div className="flex-1 overflow-y-auto py-16 px-12 md:px-20 max-w-5xl w-full mx-auto">
+  {currentSubTab ? (
+    currentTheme.type === "table" ? (
+      <div className="animate-fadeIn">
+        <h2 className="text-lg font-bold mb-4 text-emerald-400">📊 Hoja de Cálculo Interactiva</h2>
+        <Table 
+          content={currentSubTab.content} 
+          onChange={(newData) => updateContent(currentSubTab.id, newData)} 
+        />
+      </div>
+    ) : (
+      <div className="animate-fadeIn">
+        <h2 className="text-lg font-bold mb-4 text-zinc-400">📝 Notas Enriquecidas</h2>
+        <RichTextEditor
+          content={currentSubTab.content}
+          onChange={(newHtml) => updateContent(currentSubTab.id, newHtml)}
+        />
+      </div>
+    )
+  ) : (
+    <p className="text-zinc-600">No hay ninguna pestaña activa.</p>
+  )}
+</div>
 
         {/* PANEL INFERIOR: PESTAÑAS ESTILO EXCEL */}
         {currentTheme && (

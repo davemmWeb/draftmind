@@ -86,27 +86,28 @@ function Table({ content, onChange }) {
         </div>
       </div>
 
-      {/* CONTENEDOR DE LA TABLA */}
-      <div className="overflow-x-auto border border-zinc-800 rounded-xl bg-[#18181b] shadow-inner max-w-full">
+      {/* CONTENEDOR DE LA TABLA CON SCROLL VERTICAL Y HORIZONTAL */}
+      <div className="overflow-auto max-h-[60vh] border border-zinc-800 rounded-xl bg-[#18181b] shadow-inner max-w-full relative custom-scrollbar">
         <table 
-          style={{ minWidth: "100%", width: table.getCenterTotalSize() }}// TanStack calcula el ancho total automáticamente
+          style={{ minWidth: "100%", width: table.getCenterTotalSize() }}
           className="border-collapse table-fixed"
         >
-          <thead>
+          {/* Añadimos 'sticky top-0 z-20' para congelar la cabecera */}
+          <thead className="sticky top-0 z-20 shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="bg-[#1c1c1c]">
-                {/* Esquina superior izquierda para los índices de filas */}
+                {/* Esquina superior izquierda */}
                 <th className="w-10 min-w-[40px] border-r border-b border-zinc-800 text-[10px] text-zinc-600 font-bold text-center bg-[#1c1c1c]"></th>
                 
-                {headerGroup.headers.map((header, colIdx) => (
+                {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    style={{ width: header.getSize() }} // Asigna el tamaño dinámico de la librería
+                    style={{ width: header.getSize() }}
                     className="px-2 py-1 text-[11px] font-bold text-zinc-500 tracking-wider text-center border-r border-b border-zinc-800 uppercase relative bg-[#1c1c1c]"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                     
-                    {/* DIVISOR DE RESIZE MANEJADO POR TANSTACK */}
+                    {/* DIVISOR DE RESIZE */}
                     <div
                       onMouseDown={header.getResizeHandler()}
                       onTouchStart={header.getResizeHandler()}
@@ -150,7 +151,6 @@ function Table({ content, onChange }) {
 
       <div className="text-[10px] text-zinc-600 font-mono px-1 flex justify-between items-center">
         <span>Dimensión: {data.length} filas × {data[0]?.length || 0} columnas</span>
-        <span className="text-[9px] text-zinc-500">Impulsado por TanStack Table ⚡</span>
       </div>
     </div>
   );
