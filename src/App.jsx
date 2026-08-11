@@ -1,26 +1,42 @@
 import { useState, useEffect } from "react";
 import Table from "./components/Table";
 import RichTextEditor from "./components/RichTextEditor";
+import DevTools from "./components/DevTools";
+import ThemeSidebar from "./components/ThemeSidebar";
+import SubTabFooter from "./components/SubTabFooter";
 
-const LOCAL_STORAGE_KEY = "draftmind_themes_v5";
+const LOCAL_STORAGE_KEY = "draftmind_themes_v7";
 
 const DEFAULT_DATA = [
   {
     id: "theme-1",
     title: "📝 Notas de Viaje",
-    type: "text", // El tipo ahora pertenece al Tema completo
-    subTabs: [
-      { id: "sub-1", title: "Hoja 1", content: "Lienzo de texto para mis notas..." },
-      { id: "sub-2", title: "Hoja 2", content: "" },
-    ],
+    type: "text",
+    subTabs: [{ id: "sub-1", title: "Hoja 1", content: "Lienzo de texto..." }],
   },
   {
     id: "theme-2",
     title: "📊 Finanzas Personales",
-    type: "table", // Tema tipo Excel
-    subTabs: [
-      { id: "sub-3", title: "Tabla 1", content: [["Concepto", "Valor"], ["Ingresos", "0"], ["Gastos", "0"]] },
-    ],
+    type: "table",
+    subTabs: [{ id: "sub-2", title: "Tabla 1", content: [["Concepto", "Valor"], ["Ingresos", "0"]] }],
+  },
+  {
+    id: "theme-3",
+    title: "🛠️ Formatter de Logs",
+    type: "json-formatter",
+    subTabs: [{ id: "sub-3", title: "Format 1", content: { input1: '', output: '', error: null } }],
+  },
+  {
+    id: "theme-4",
+    title: "⚖️ Comparador JSON",
+    type: "json-diff",
+    subTabs: [{ id: "sub-4", title: "Diff 1", content: { input1: '', input2: '', error: null } }],
+  },
+  {
+    id: "theme-5",
+    title: "🚀 Pruebas API",
+    type: "rest-client",
+    subTabs: [{ id: "sub-5", title: "Req 1", content: { url: '', method: 'GET', input1: '', output: '' } }],
   },
 ];
 
@@ -32,8 +48,6 @@ function App() {
 
   const [activeThemeId, setActiveThemeId] = useState(() => themes[0]?.id || "theme-1");
   const [activeSubTabId, setActiveSubTabId] = useState(() => themes[0]?.subTabs[0]?.id || "sub-1");
-  
-  // Menú flotante ahora para añadir TEMAS a la izquierda
   const [showThemeMenu, setShowThemeMenu] = useState(false);
 
   useEffect(() => {
@@ -43,16 +57,39 @@ function App() {
   const currentTheme = themes.find((t) => t.id === activeThemeId) || themes[0];
   const currentSubTab = currentTheme?.subTabs?.find((st) => st.id === activeSubTabId) || currentTheme?.subTabs?.[0];
 
-  // ==========================================
-  // OPERACIONES DE TEMAS (Elegir tipo al crear)
-  // ==========================================
+  // --- Crear Tema (Maneja los 5 Tipos) ---
   const handleAddTheme = (type) => {
     const newThemeId = crypto.randomUUID();
     const newSubTabId = crypto.randomUUID();
-    
-    const initialContent = type === "table" ? Array(8).fill(null).map(() => Array(5).fill("")) : "";
-    const defaultTabTitle = type === "table" ? "Tabla 1" : "Hoja 1";
-    const defaultThemeTitle = type === "table" ? "📊 Nuevo Excel" : "📝 Nuevas Notas";
+
+    let initialContent = "";
+    let defaultTabTitle = "Hoja 1";
+    let defaultThemeTitle = "📝 Nuevas Notas";
+
+    switch (type) {
+      case "table":
+        initialContent = Array(8).fill(null).map(() => Array(5).fill(""));
+        defaultTabTitle = "Tabla 1";
+        defaultThemeTitle = "📊 Hoja de Cálculo";
+        break;
+      case "json-formatter":
+        initialContent = { input1: '', output: '', error: null };
+        defaultTabTitle = "Format 1";
+        defaultThemeTitle = "🛠️ JSON Formatter";
+        break;
+      case "json-diff":
+        initialContent = { input1: '', input2: '', error: null };
+        defaultTabTitle = "Diff 1";
+        defaultThemeTitle = "⚖️ JSON Diff";
+        break;
+      case "rest-client":
+        initialContent = { url: '', method: 'GET', input1: '', output: '', error: null };
+        defaultTabTitle = "Req 1";
+        defaultThemeTitle = "🚀 REST Client";
+        break;
+      default:
+        break;
+    }
 
     const newTheme = {
       id: newThemeId,
@@ -85,19 +122,36 @@ function App() {
     }
   };
 
-  // ==========================================
-  // OPERACIONES DE PESTAÑAS INFERIORES
-  // ==========================================
+  // --- Crear Pestañas Inferiores segun el Tema Activo ---
   const handleAddSubTab = () => {
     if (!currentTheme) return;
 
     const newSubTabId = crypto.randomUUID();
     const nextNumber = (currentTheme.subTabs?.length || 0) + 1;
-    
-    // El contenido inicial depende estrictamente del tipo del tema actual
-    const isTable = currentTheme.type === "table";
-    const defaultTitle = isTable ? `Tabla ${nextNumber}` : `Hoja ${nextNumber}`;
-    const initialContent = isTable ? Array(8).fill(null).map(() => Array(5).fill("")) : "";
+
+    let initialContent = "";
+    let defaultTitle = `Hoja ${nextNumber}`;
+
+    switch (currentTheme.type) {
+      case "table":
+        initialContent = Array(8).fill(null).map(() => Array(5).fill(""));
+        defaultTitle = `Tabla ${nextNumber}`;
+        break;
+      case "json-formatter":
+        initialContent = { input1: '', output: '', error: null };
+        defaultTitle = `Format ${nextNumber}`;
+        break;
+      case "json-diff":
+        initialContent = { input1: '', input2: '', error: null };
+        defaultTitle = `Diff ${nextNumber}`;
+        break;
+      case "rest-client":
+        initialContent = { url: '', method: 'GET', input1: '', output: '', error: null };
+        defaultTitle = `Req ${nextNumber}`;
+        break;
+      default:
+        break;
+    }
 
     const newSubTab = {
       id: newSubTabId,
@@ -151,136 +205,97 @@ function App() {
 
   const handleThemeChange = (theme) => {
     setActiveThemeId(theme.id);
-    // Al cambiar de tema, enfocamos automáticamente su primera pestaña
     setActiveSubTabId(theme.subTabs[0]?.id || "");
   };
 
-  return (
-    <div className="min-h-screen bg-[#141414] text-zinc-100 flex font-sans select-none">
-      
-      {/* PANEL IZQUIERDO: TEMAS */}
-      <aside className="w-64 bg-[#1c1c1c] border-r border-zinc-800 flex flex-col justify-between p-4 shrink-0">
-        <div className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider px-2 mb-4">Mis Temas</div>
-          <div className="flex flex-col gap-1 overflow-y-auto max-h-[75vh]">
-            {themes.map((theme) => (
-              <div
-                key={theme.id}
-                onClick={() => handleThemeChange(theme)}
-                className={`flex items-center justify-between gap-2 px-3 py-2 rounded-xl cursor-pointer transition group ${
-                  theme.id === activeThemeId ? "bg-zinc-800 text-zinc-50 font-medium" : "text-zinc-400 hover:bg-zinc-900"
-                }`}
-              >
-                <input
-                  type="text"
-                  value={theme.title}
-                  onChange={(e) => updateThemeTitle(theme.id, e.target.value)}
-                  className="bg-transparent border-none outline-none focus:ring-0 w-full p-0 cursor-pointer text-inherit"
-                />
-                {themes.length > 1 && (
-                  <button
-                    onClick={(e) => deleteTheme(theme.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-red-400 rounded transition-all text-xs"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
+  const renderMainContent = () => {
+    if (!currentSubTab) return <p className="text-zinc-600">No hay ninguna pestaña activa.</p>;
+
+    switch (currentTheme.type) {
+      case "table":
+        return (
+          <div className="animate-fadeIn h-full">
+            <h2 className="text-lg font-bold mb-4 text-emerald-400">📊 Hoja de Cálculo Interactiva</h2>
+            <Table
+              content={currentSubTab.content}
+              onChange={(newData) => updateContent(currentSubTab.id, newData)}
+            />
           </div>
-        </div>
-
-        {/* Añadir Tema con Selector de Tipo */}
-        <div className="relative">
-          <button 
-            onClick={() => setShowThemeMenu(!showThemeMenu)} 
-            className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm py-2.5 rounded-xl font-medium transition"
-          >
-            + Añadir Tema
-          </button>
-          
-          {showThemeMenu && (
-            <div className="absolute bottom-12 left-0 w-full bg-[#222] border border-zinc-800 p-1.5 rounded-xl shadow-2xl flex flex-col gap-1 z-50">
-              <button onClick={() => handleAddTheme("text")} className="text-left text-xs text-zinc-300 hover:bg-zinc-800 px-3 py-2 rounded-lg transition flex items-center gap-2">
-                📝 Tema de Notas
-              </button>
-              <button onClick={() => handleAddTheme("table")} className="text-left text-xs text-zinc-300 hover:bg-emerald-950 hover:text-emerald-300 px-3 py-2 rounded-lg transition flex items-center gap-2">
-                📊 Hoja de calculo
-              </button>
+        );
+      case "json-formatter":
+        return (
+          <div className="animate-fadeIn h-full">
+            <h2 className="text-lg font-bold mb-3 text-indigo-400">🛠️ JSON Formatter</h2>
+            <DevTools
+              type="json-formatter"
+              content={currentSubTab.content}
+              onChange={(newData) => updateContent(currentSubTab.id, newData)}
+            />
+          </div>
+        );
+      case "json-diff":
+        return (
+          <div className="animate-fadeIn h-full flex flex-col overflow-hidden">
+            <h2 className="text-lg font-bold mb-3 text-purple-400 shrink-0">⚖️ JSON Diff / Compare</h2>
+            <div className="flex-1 min-h-0">
+              <DevTools
+                type="json-diff"
+                content={currentSubTab.content}
+                onChange={(newData) => updateContent(currentSubTab.id, newData)}
+              />
             </div>
-          )}
+          </div>
+        );
+      case "rest-client":
+        return (
+          <div className="animate-fadeIn h-full">
+            <h2 className="text-lg font-bold mb-3 text-amber-400">🚀 REST Client (Fetch)</h2>
+            <DevTools
+              type="rest-client"
+              content={currentSubTab.content}
+              onChange={(newData) => updateContent(currentSubTab.id, newData)}
+            />
+          </div>
+        );
+      default:
+        return (
+          <div className="animate-fadeIn h-full">
+            <h2 className="text-lg font-bold mb-4 text-zinc-400">📝 Notas Enriquecidas</h2>
+            <RichTextEditor
+              content={currentSubTab.content}
+              onChange={(newHtml) => updateContent(currentSubTab.id, newHtml)}
+            />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#141414] text-zinc-100 flex font-sans select-none h-screen overflow-hidden">
+      <ThemeSidebar
+        themes={themes}
+        activeThemeId={activeThemeId}
+        showThemeMenu={showThemeMenu}
+        setShowThemeMenu={setShowThemeMenu}
+        onSelectTheme={handleThemeChange}
+        onAddTheme={handleAddTheme}
+        onUpdateTitle={updateThemeTitle}
+        onDeleteTheme={deleteTheme}
+      />
+
+      <main className="flex-1 flex flex-col justify-between bg-[#141414] relative overflow-hidden h-full">
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 max-w-6xl w-full mx-auto h-[calc(100vh-50px)]">
+          {renderMainContent()}
         </div>
-      </aside>
 
-      {/* CONTENEDOR PRINCIPAL */}
-      <main className="flex-1 flex flex-col justify-between bg-[#141414] relative overflow-hidden">
-        
-       {/* ÁREA DE CONTENIDO */}
-<div className="flex-1 overflow-y-auto py-16 px-12 md:px-20 max-w-5xl w-full mx-auto">
-  {currentSubTab ? (
-    currentTheme.type === "table" ? (
-      <div className="animate-fadeIn">
-        <h2 className="text-lg font-bold mb-4 text-emerald-400">📊 Hoja de Cálculo Interactiva</h2>
-        <Table 
-          content={currentSubTab.content} 
-          onChange={(newData) => updateContent(currentSubTab.id, newData)} 
+        <SubTabFooter
+          currentTheme={currentTheme}
+          activeSubTabId={activeSubTabId}
+          onSelectSubTab={setActiveSubTabId}
+          onAddSubTab={handleAddSubTab}
+          onUpdateSubTabTitle={updateSubTabTitle}
+          onDeleteSubTab={deleteSubTab}
         />
-      </div>
-    ) : (
-      <div className="animate-fadeIn">
-        <h2 className="text-lg font-bold mb-4 text-zinc-400">📝 Notas Enriquecidas</h2>
-        <RichTextEditor
-          content={currentSubTab.content}
-          onChange={(newHtml) => updateContent(currentSubTab.id, newHtml)}
-        />
-      </div>
-    )
-  ) : (
-    <p className="text-zinc-600">No hay ninguna pestaña activa.</p>
-  )}
-</div>
-
-        {/* PANEL INFERIOR: PESTAÑAS ESTILO EXCEL */}
-        {currentTheme && (
-          <footer className="bg-[#1c1c1c] border-t border-zinc-800 px-6 py-2 flex items-center gap-1 overflow-x-auto w-full shrink-0 relative">
-            {currentTheme.subTabs?.map((subTab) => (
-              <div
-                key={subTab.id}
-                onClick={() => setActiveSubTabId(subTab.id)}
-                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium border rounded-t-lg cursor-pointer transition group ${
-                  subTab.id === activeSubTabId 
-                    ? "bg-[#141414] text-emerald-400 border-zinc-800 border-b-transparent relative -bottom-[9px] z-10 font-bold" 
-                    : "bg-transparent text-zinc-400 border-transparent hover:bg-zinc-900"
-                }`}
-              >
-                <span>{currentTheme.type === "table" ? "📊" : "📝"}</span>
-                <input
-                  type="text"
-                  value={subTab.title}
-                  onChange={(e) => updateSubTabTitle(subTab.id, e.target.value)}
-                  className="bg-transparent border-none outline-none focus:ring-0 p-0 w-20 text-center cursor-pointer text-inherit"
-                />
-                {currentTheme.subTabs.length > 1 && (
-                  <button
-                    onClick={(e) => deleteSubTab(subTab.id, e)}
-                    className="opacity-0 group-hover:opacity-100 ml-1 text-zinc-500 hover:text-red-400 transition-all text-[10px]"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
-
-            {/* Botón simple de agregar pestaña que adopta la naturaleza del tema */}
-            <button
-              onClick={handleAddSubTab}
-              className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 p-1.5 rounded-lg transition text-xs font-bold ml-2"
-              title="Añadir nueva pestaña"
-            >
-              ➕
-            </button>
-          </footer>
-        )}
       </main>
     </div>
   );
