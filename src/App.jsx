@@ -7,18 +7,20 @@ import SubTabFooter from "./components/SubTabFooter";
 
 const LOCAL_STORAGE_KEY = "draftmind_themes_v7";
 
+// Los datos iniciales ahora tienen el contenido totalmente vacío ("")
+// El placeholder se maneja a nivel visual dentro de cada componente
 const DEFAULT_DATA = [
   {
     id: "theme-1",
     title: "📝 Notas de Viaje",
     type: "text",
-    subTabs: [{ id: "sub-1", title: "Hoja 1", content: "Lienzo de texto..." }],
+    subTabs: [{ id: "sub-1", title: "Hoja 1", content: "" }],
   },
   {
     id: "theme-2",
     title: "📊 Finanzas Personales",
     type: "table",
-    subTabs: [{ id: "sub-2", title: "Tabla 1", content: [["Concepto", "Valor"], ["Ingresos", "0"]] }],
+    subTabs: [{ id: "sub-2", title: "Tabla 1", content: Array(8).fill(null).map(() => Array(5).fill("")) }],
   },
   {
     id: "theme-3",
@@ -57,7 +59,7 @@ function App() {
   const currentTheme = themes.find((t) => t.id === activeThemeId) || themes[0];
   const currentSubTab = currentTheme?.subTabs?.find((st) => st.id === activeSubTabId) || currentTheme?.subTabs?.[0];
 
-  // --- Crear Tema (Maneja los 5 Tipos) ---
+  // --- Crear Tema ---
   const handleAddTheme = (type) => {
     const newThemeId = crypto.randomUUID();
     const newSubTabId = crypto.randomUUID();
@@ -263,6 +265,7 @@ function App() {
             <h2 className="text-lg font-bold mb-4 text-zinc-400">📝 Notas Enriquecidas</h2>
             <RichTextEditor
               content={currentSubTab.content}
+              placeholder="Escribe tus notas aquí..."
               onChange={(newHtml) => updateContent(currentSubTab.id, newHtml)}
             />
           </div>
