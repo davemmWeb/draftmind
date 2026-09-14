@@ -2,20 +2,44 @@ import React, { useState } from 'react';
 
 const JsonFormatter = ({ content, onChange }) => {
   const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const handleFormat = (indentSpaces) => {
     try {
       if (!content?.input1?.trim()) return;
-      const parsed = JSON.parse(content.input1);
-      
-      // indentSpaces: 2 para multilínea, 0 para 1 sola línea
+
+      const sanitizedInput = content.input1
+        .replace(/[\r\n]+/g, '')
+        .replace(/\s+/g, ' ');
+
+      const parsed = JSON.parse(sanitizedInput);
       const formatted = JSON.stringify(parsed, null, indentSpaces);
-      
-      onChange({ ...content, output: formatted, error: null });
+
+      onChange({ ...content, output: formatted });
       setError(null);
     } catch (err) {
-      setError('❌ JSON Inválido: Revisa la sintaxis');
-      onChange({ ...content, output: '', error: '❌ JSON Inválido' });
+      try {
+        const fallbackSanitize = content.input1.replace(/(\r\n|\n|\r)/gm, "");
+        const parsed = JSON.parse(fallbackSanitize);
+        const formatted = JSON.stringify(parsed, null, indentSpaces);
+
+        onChange({ ...content, output: formatted });
+        setError(null);
+      } catch (fallbackErr) {
+        setError('❌ JSON Inválido: Sintaxis incorrecta');
+        onChange({ ...content, output: '' });
+      }
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!content?.output) return;
+    try {
+      await navigator.clipboard.writeText(content.output);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Error al copiar: ', err);
     }
   };
 
@@ -37,14 +61,22 @@ const JsonFormatter = ({ content, onChange }) => {
 
         {/* Output */}
         <div className="flex flex-col flex-1 min-w-0 bg-[#1c1c1c] rounded-xl border border-zinc-800 overflow-hidden">
-          <div className="bg-[#141414] px-3 py-2 text-xs font-semibold text-zinc-400 border-b border-zinc-800">
-            Resultado Formateado
+          <div className="bg-[#141414] px-3 py-2 text-xs font-semibold text-zinc-400 border-b border-zinc-800 flex justify-between items-center shrink-0">
+            <span>Resultado Formateado</span>
+            {content?.output && !error && (
+              <button
+                onClick={handleCopy}
+                className="px-2.5 py-1 text-[11px] font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-md transition cursor-pointer flex items-center gap-1"
+              >
+                {copied ? '✅ ¡Copiado!' : '📋 Copiar'}
+              </button>
+            )}
           </div>
-          <div className="flex-1 p-4 overflow-auto">
+          <div className="flex-1 p-4 overflow-auto select-text">
             {error ? (
               <p className="text-red-400 font-mono text-xs">{error}</p>
             ) : (
-              <pre className="font-mono text-xs text-indigo-300 whitespace-pre-wrap leading-relaxed">
+              <pre className="font-mono text-xs text-indigo-300 whitespace-pre-wrap leading-relaxed select-text">
                 {content?.output || '// El resultado aparecerá aquí...'}
               </pre>
             )}
